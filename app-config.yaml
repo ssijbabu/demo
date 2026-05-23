@@ -10,6 +10,9 @@ app:
     - page:catalog:
         config:
           path: /
+    # Disable default themes so Handelsbanken is the only option
+    - theme:app/light: false
+    - theme:app/dark: false
 
 organization:
   name: My Company
@@ -47,16 +50,11 @@ backend:
       - scaffolder
   # workingDirectory: /tmp # Use this to configure a working directory for the scaffolder, defaults to the OS temp-dir
 
-integrations:
-  github:
-    - host: github.com
-      # This is a Personal Access Token or PAT from GitHub. You can find out how to generate this token, and more information
-      # about setting up the GitHub integration here: https://backstage.io/docs/integrations/github/locations#configuration
-      token: ${GITHUB_TOKEN}
-    ### Example for how to add your GitHub Enterprise instance using the API:
-    # - host: ghe.example.net
-    #   apiBaseUrl: https://ghe.example.net/api/v3
-    #   token: ${GHE_TOKEN}
+# integrations:
+#   GitHub integration — uncomment and set GITHUB_TOKEN in .env to enable
+#   github:
+#     - host: github.com
+#       token: ${GITHUB_TOKEN}
 
 proxy:
   ### Example for how to add a proxy endpoint for the frontend.
@@ -82,6 +80,27 @@ auth:
   providers:
     # See https://backstage.io/docs/auth/guest/provider
     guest: {}
+
+    # Microsoft / Azure Entra ID authentication
+    # Uses the same env vars as DefaultAzureCredential from @azure/identity:
+    #   AZURE_CLIENT_ID     - App registration (client) ID
+    #   AZURE_CLIENT_SECRET - Client secret  (EnvironmentCredential)
+    #   AZURE_TENANT_ID     - Azure AD tenant ID
+    # Certificate alternative (mutually exclusive with clientSecret):
+    #   AZURE_CLIENT_CERTIFICATE_PATH - Path to PEM/PFX cert file
+    # When running in Azure with Managed Identity, set only AZURE_CLIENT_ID
+    # and AZURE_TENANT_ID; omit clientSecret and set clientCertificatePath
+    # to the identity certificate path instead, or configure workload identity.
+    microsoft:
+      development:
+        clientId: ${AZURE_CLIENT_ID}
+        clientSecret: ${AZURE_CLIENT_SECRET}
+        tenantId: ${AZURE_TENANT_ID}
+        # Uncomment to use certificate instead of client secret:
+        # clientCertificatePath: ${AZURE_CLIENT_CERTIFICATE_PATH}
+        # Uncomment to restrict sign-in to a specific domain:
+        # domainHint: ${AZURE_TENANT_ID}
+        # sign-in resolver is handled in packages/backend/src/modules/microsoftAuthModule.ts
   # see https://backstage.io/docs/ai/mcp-actions#client-id-metadata-documents
   # to learn more about client id metadata documents
   experimentalClientIdMetadataDocuments:
