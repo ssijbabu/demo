@@ -1,0 +1,44 @@
+services:
+  backstage:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: backstage:local
+    ports:
+      - "7007:7007"
+    environment:
+      # Azure AD — required for Microsoft sign-in
+      AZURE_CLIENT_ID: ${AZURE_CLIENT_ID}
+      AZURE_TENANT_ID: ${AZURE_TENANT_ID}
+      # Client secret for local container dev (omit in AKS — use workload identity instead)
+      AZURE_CLIENT_SECRET: ${AZURE_CLIENT_SECRET}
+      # PostgreSQL
+      POSTGRES_HOST: db
+      POSTGRES_PORT: 5432
+      POSTGRES_USER: backstage
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-backstage}
+      # Public URLs — override if running behind a load balancer or ingress
+      APP_BASE_URL: ${APP_BASE_URL:-http://localhost:7007}
+      BACKEND_BASE_URL: ${BACKEND_BASE_URL:-http://localhost:7007}
+    depends_on:
+      db:
+        condition: service_healthy
+    restart: unless-stopped
+
+  db:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: backstage
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-backstage}
+      POSTGRES_DB: backstage
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U backstage"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+    restart: unless-stopped
+
+volumes:
+  postgres_data:
