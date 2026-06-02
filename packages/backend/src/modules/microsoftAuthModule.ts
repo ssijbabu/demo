@@ -1,12 +1,10 @@
 import { createBackendModule } from '@backstage/backend-plugin-api';
-import {
-  microsoftAuthenticator,
-  microsoftSignInResolvers,
-} from '@backstage/plugin-auth-backend-module-microsoft-provider';
+import { microsoftSignInResolvers } from '@backstage/plugin-auth-backend-module-microsoft-provider';
 import {
   authProvidersExtensionPoint,
   createOAuthProviderFactory,
 } from '@backstage/plugin-auth-node';
+import { federatedMicrosoftAuthenticator } from './federatedMicrosoftAuthenticator';
 
 export default createBackendModule({
   pluginId: 'auth',
@@ -18,7 +16,7 @@ export default createBackendModule({
         providers.registerProvider({
           providerId: 'microsoft',
           factory: createOAuthProviderFactory({
-            authenticator: microsoftAuthenticator,
+            authenticator: federatedMicrosoftAuthenticator,
             signInResolver:
               microsoftSignInResolvers.emailMatchingUserEntityAnnotation({
                 dangerouslyAllowSignInWithoutUserInCatalog: true,
