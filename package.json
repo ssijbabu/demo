@@ -51,7 +51,9 @@
   },
   "resolutions": {
     "@types/react": "^18",
-    "@types/react-dom": "^18"
+    "@types/react-dom": "^18",
+    "protobufjs": "7.6.3",
+    "urllib/undici": "^6.26.0"
   },
   "prettier": "@backstage/cli/config/prettier",
   "lint-staged": {
